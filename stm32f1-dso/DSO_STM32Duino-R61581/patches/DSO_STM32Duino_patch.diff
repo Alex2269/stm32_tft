@@ -1,0 +1,309 @@
+diff -Naur a/Adafruit_TFTLCD_8bit_STM32/Adafruit_TFTLCD_8bit_STM32.h b/Adafruit_TFTLCD_8bit_STM32/Adafruit_TFTLCD_8bit_STM32.h
+--- a/Adafruit_TFTLCD_8bit_STM32/Adafruit_TFTLCD_8bit_STM32.h	2021-01-21 11:47:00.534295997 +0200
++++ DSO_STM32Duino/Adafruit_TFTLCD_8bit_STM32/Adafruit_TFTLCD_8bit_STM32.h	2021-01-21 02:43:02.000000000 +0200
+@@ -24,8 +24,8 @@
+ };
+ 
+ /*****************************************************************************/
+-#define TFTWIDTH   240
+-#define TFTHEIGHT  320
++#define TFTWIDTH   320
++#define TFTHEIGHT  480
+ 
+ // Initialization command tables for different LCD controllers
+ #define TFTLCD_DELAY 0xFF
+diff -Naur a/Adafruit_TFTLCD_8bit_STM32/ili9341.cpp b/Adafruit_TFTLCD_8bit_STM32/ili9341.cpp
+--- a/Adafruit_TFTLCD_8bit_STM32/ili9341.cpp	2021-01-21 11:47:00.534295997 +0200
++++ DSO_STM32Duino/Adafruit_TFTLCD_8bit_STM32/ili9341.cpp	2021-01-21 02:41:03.000000000 +0200
+@@ -30,20 +30,20 @@
+ #define TFTLCD_DELAY8 0xFF
+ 
+ const uint8_t ILI9341_regValues_ada[] = {        // Adafruit_TFTLCD only works with EXTC=0
+-	//                     0xF6, 3, 0x00, 0x01, 0x00,  //Interface Control needs EXTC=1 TM=0, RIM=0
+-	//            0xF6, 3, 0x01, 0x01, 0x03,  //Interface Control needs EXTC=1 RM=1, RIM=1
+-/**/
+-	0xF6, 3, 0x09, 0x01, 0x03,  //Interface Control needs EXTC=1 RM=0, RIM=1
+-	0xB0, 1, 0x40,      //RGB Signal [40] RCM=2
+-	0xB4, 1, 0x00,      //Inversion Control [02] .kbv NLA=1, NLB=1, NLC=1
+-	0xC0, 1, 0x23,      //Power Control 1 [26]
+-	0xC1, 1, 0x10,      //Power Control 2 [00]
+-	0xC5, 2, 0x2B, 0x2B,        //VCOM 1 [31 3C]
+-	0xC7, 1, 0xC0,      //VCOM 2 [C0]
+-	0x36, 1, 0x48,      //Memory Access [00]
+-	0xB1, 2, 0x00, 0x1B,        //Frame Control [00 1B]
+-	0xB7, 1, 0x07,      //Entry Mode [00]
+-//	TFTLCD_DELAY8, 1,
++// 	//                     0xF6, 3, 0x00, 0x01, 0x00,  //Interface Control needs EXTC=1 TM=0, RIM=0
++// 	//            0xF6, 3, 0x01, 0x01, 0x03,  //Interface Control needs EXTC=1 RM=1, RIM=1
++// /**/
++// 	0xF6, 3, 0x09, 0x01, 0x03,  //Interface Control needs EXTC=1 RM=0, RIM=1
++// 	0xB0, 1, 0x40,      //RGB Signal [40] RCM=2
++// 	0xB4, 1, 0x00,      //Inversion Control [02] .kbv NLA=1, NLB=1, NLC=1
++// 	0xC0, 1, 0x23,      //Power Control 1 [26]
++// 	0xC1, 1, 0x10,      //Power Control 2 [00]
++// 	0xC5, 2, 0x2B, 0x2B,        //VCOM 1 [31 3C]
++// 	0xC7, 1, 0xC0,      //VCOM 2 [C0]
++// 	0x36, 1, 0x48,      //Memory Access [00]
++// 	0xB1, 2, 0x00, 0x1B,        //Frame Control [00 1B]
++// 	0xB7, 1, 0x07,      //Entry Mode [00]
++// //	TFTLCD_DELAY8, 1,
+ };
+ inline void writeCommand(uint16_t c)
+ {
+@@ -62,11 +62,27 @@
+ */
+ const uint8_t ILI9341_regValues_post[] =
+ { // post-init settings, sniffed from David's lib
+-	0x36, 1, 0x48,      //Memory Access [00]
+-	0x33, 6, 0x00, 0x00, 0x01, 0x40, 0x00, 0x00,
+-	0x37, 2, 0x00, 0x00,
+-	0x13, 0,			// normaldisp
+-	ILI9341_INVERTOFF, 0,			// invert off
++  //cmd number-data data's
++  0x01, 0, //Soft Reset
++  TFTLCD_DELAY8, 150, // will power up with ONLY reset, sleep out, display on
++  0x28, 0, //Display Off
++  0x3A, 1, 0x55, //Pixel read=565, write=565.
++
++  // Atmel MaxTouch
++  0xB0, 1, 0x00, // unlocks E0, F0
++  0xB3, 4, 0x02, 0x00, 0x00, 0x00, //Frame Memory, interface [02 00 00 00]
++  0xB4, 1, 0x00, // Frame mode [00]
++  0xD0, 3, 0x07, 0x42, 0x18, // Set Power [00 43 18] x1.00, x6, x3
++  0xD1, 3, 0x00, 0x07, 0x10, // Set VCOM [00 00 00] x0.72, x1.02
++  0xD2, 2, 0x01, 0x02, // Set Power for Normal Mode [01 22]
++  0xD3, 2, 0x01, 0x02, // Set Power for Partial Mode [01 22]
++  0xD4, 2, 0x01, 0x02, // Set Power for Idle Mode [01 22]
++  0xC0, 5, 0x12, 0x3B, 0x00, 0x02, 0x11, //Panel Driving BGR for 1581 [10 3B 00 02 11]
++  0xC5, 1, 0x03, //Frame Rate [03]
++
++  0x11, 0, //Sleep Out
++  TFTLCD_DELAY8, 150,
++  0x29, 0, //Display On
+ };
+ /*****************************************************************************/
+ static void WriteCmdParamN(uint16_t cmd, int8_t N, const uint8_t * block)
+@@ -206,21 +222,20 @@
+ 
+    switch (rotation) {
+    case 1:
+-     t = ILI9341_MADCTL_MX | ILI9341_MADCTL_MY | ILI9341_MADCTL_MV | ILI9341_MADCTL_RGB;
++     t = 0x40|0x80|0x20|0x08; 
+      break;
+    case 2:
+-     t = ILI9341_MADCTL_MX | ILI9341_MADCTL_RGB;
++    t = 0x80|0x08;
+      break;
+    case 3:
+-     t = ILI9341_MADCTL_MV | ILI9341_MADCTL_RGB;
++    t = 0x20|0x08;
+      break;
+    case 0:
+    default:
+-    t = ILI9341_MADCTL_MY | ILI9341_MADCTL_RGB;
++    t = 0x40|0x08;
+     break;
+   }
+    writeRegister8(ILI9341_MADCTL, t ); // MADCTL
+-  
+ }
+ 
+ 
+@@ -297,4 +312,4 @@
+     
+ }
+ 
+-// EOF
+\ В конце файла нет новой строки
++// EOF
+diff -Naur a/Adafruit_TFTLCD_8bit_STM32/st7789.cpp b/Adafruit_TFTLCD_8bit_STM32/st7789.cpp
+--- a/Adafruit_TFTLCD_8bit_STM32/st7789.cpp	2021-01-21 11:47:00.534295997 +0200
++++ DSO_STM32Duino/Adafruit_TFTLCD_8bit_STM32/st7789.cpp	2021-01-21 02:42:02.000000000 +0200
+@@ -38,7 +38,7 @@
+     switch (rotation) 
+     {
+     case 1:
+-      t =  ILI9341_MADCTL_MV | ILI9341_MADCTL_MY;
++      t =  ILI9341_MADCTL_MV ;
+       break;
+     case 2:
+       t = 0 ;
+@@ -48,10 +48,10 @@
+       break;
+     case 0:
+     default:
+-      t =  ILI9341_MADCTL_MX | ILI9341_MADCTL_MY;
++      t =  ILI9341_MADCTL_MX ;
+      break;
+    }
+-   t|=ILI9341_MADCTL_RGB;
+-   writeRegister8(ILI9341_MADCTL, t ); // MADCTL
++   t|=ILI9341_MADCTL_RGB|0x08;
++   writeRegister8(ILI9341_MADCTL, t); // MADCTL
+   
+-}
+\ В конце файла нет новой строки
++}
+diff -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2021-01-21 11:47:00.534295997 +0200
++++ DSO_STM32Duino/CMakeLists.txt	2021-01-21 11:33:49.000000000 +0200
+@@ -15,7 +15,7 @@
+ #
+ include(./platformConfig.cmake)
+ APPLY_PATCH_IF_NEEDED(patched gd32_patch.diff              "add gd32f303 support") 
+-
++APPLY_PATCH_IF_NEEDED(patched tft_patch.diff              "replace ILI9341 to R61581") 
+ 
+ cmake_minimum_required(VERSION 2.8)
+ #
+diff -Naur a/platformConfig.cmake b/platformConfig.cmake
+--- a/platformConfig.cmake	2021-01-21 11:47:00.546295559 +0200
++++ DSO_STM32Duino/platformConfig.cmake	2021-01-21 11:36:43.000000000 +0200
+@@ -7,8 +7,9 @@
+     SET(PLATFORM_TOOLCHAIN_PATH  "/c/dev/arm83/bin")
+ ELSE(WIN32)
+     # ARDUINO_SDK_PATH should be autodetected
++    SET(ARDUINO_SDK_PATH "${CMAKE_CURRENT_SOURCE_DIR}/arduino-core")
+     #SET(PLATFORM_TOOLCHAIN_PATH "/home/fx/Arduino_stm32/arm-none-eabi-gcc/download/gcc-arm-none-eabi-8.2.1-1.7/bin")
+     #SET(PLATFORM_TOOLCHAIN_PATH "/home/fx/Arduino_stm32/arm_gcc_9.3/bin")
+-    #SET(PLATFORM_TOOLCHAIN_PATH "/usr/bin")
+-    SET(PLATFORM_TOOLCHAIN_PATH "/home/fx/Arduino_stm32/arm-gcc-2020q2/bin")
++    SET(PLATFORM_TOOLCHAIN_PATH "/usr/bin")
++    #SET(PLATFORM_TOOLCHAIN_PATH "/home/fx/Arduino_stm32/arm-gcc-2020q2/bin")
+ ENDIF(WIN32)
+diff -Naur a/src/dso_calibrate.cpp b/src/dso_calibrate.cpp
+--- a/src/dso_calibrate.cpp	2021-01-21 11:47:00.546295559 +0200
++++ DSO_STM32Duino/src/dso_calibrate.cpp	2021-01-21 01:57:26.000000000 +0200
+@@ -135,10 +135,10 @@
+     
+     adc->setTimeScale(ADC_SMPR_1_5,DSOADC::ADC_PRESCALER_2); // 10 us *1024 => 10 ms scan
+     printCalibrationTemplate("Connect the 2 crocs","together");
+-    waitOk();    
+-    doCalibrate(calibrationDC,YELLOW,"",DSOControl::DSO_COUPLING_DC);       
+-    doCalibrate(calibrationAC,GREEN, "",DSOControl::DSO_COUPLING_AC);    
+-    DSOEeprom::write();         
++    // waitOk();    
++    // doCalibrate(calibrationDC,YELLOW,"",DSOControl::DSO_COUPLING_DC);       
++    // doCalibrate(calibrationAC,GREEN, "",DSOControl::DSO_COUPLING_AC);    
++    // DSOEeprom::write();
+     tft->fillScreen(0);    
+     DSO_GFX::printxy(20,100,"Restart the unit.");
+     while(1) {};
+@@ -219,7 +219,7 @@
+             voltageFineTune[dex]=0;
+     }    
+     // If we have both 100mv and 2v
+-    DSOEeprom::write();         
++    // DSOEeprom::write();         
+     tft->fillScreen(0);
+     return true;         
+ }
+diff -Naur a/src/dso_debug.h b/src/dso_debug.h
+--- a/src/dso_debug.h	2021-01-21 11:47:00.546295559 +0200
++++ DSO_STM32Duino/src/dso_debug.h	2021-01-21 02:37:41.000000000 +0200
+@@ -4,4 +4,4 @@
+     void Logger(int val);
+ #else
+     #define Logger(...) {}
+-#endif²
++#endif // 
+diff -Naur a/src/dso_display.cpp b/src/dso_display.cpp
+--- a/src/dso_display.cpp	2021-01-21 11:47:00.546295559 +0200
++++ DSO_STM32Duino/src/dso_display.cpp	2021-01-21 02:48:26.000000000 +0200
+@@ -14,7 +14,7 @@
+ #include "stopWatch.h"
+ 
+ 
+-#define AUTOCAL_BOX_WIDTH   200
++#define AUTOCAL_BOX_WIDTH   400
+ #define AUTOCAL_BOX_HEIGHT  80
+ #define AUTOCAL_BORDER      10
+ #define AUTOCAL_COLOR       WHITE
+@@ -26,13 +26,13 @@
+ static DSODisplay::MODE_TYPE mode=DSODisplay::VOLTAGE_MODE;
+ /**
+  */
+-uint8_t prevPos[256];
+-uint8_t prevSize[256];
++uint8_t prevPos[382];
++uint8_t prevSize[382];
+ static char textBuffer[24];
+ 
+ //-
+-#define SCALE_STEP 24
+-#define C_X 10
++#define SCALE_STEP 32
++#define C_X 12
+ #define C_Y 8
+ #define CENTER_CROSS 1
+ 
+@@ -66,7 +66,7 @@
+  */
+ void DSODisplay::init()
+ {
+-    for(int i=0;i<256;i++)
++    for(int i=0;i<382;i++)
+     {
+         prevPos[i]=120;
+         prevSize[i]=1;
+@@ -188,8 +188,8 @@
+ 
+ #define DSO_CHAR_HEIGHT 20
+ #define DSO_HEIGHT_OFFSET 1
+-#define DSO_INFO_START_COLUMN (248)
+-#define DSO_INFO_MAX_WIDTH  (320-DSO_INFO_START_COLUMN-8)
++#define DSO_INFO_START_COLUMN (AUTOCAL_BOX_WIDTH)
++#define DSO_INFO_MAX_WIDTH  (DSO_INFO_START_COLUMN-8)
+ 
+ 
+ /**
+@@ -246,8 +246,8 @@
+     
+ 
+ #define BG_COLOR GREEN    
+-        tft->drawFastVLine(DSO_INFO_START_COLUMN, 0,240,BG_COLOR);
+-        tft->drawFastVLine(319, 0,240,BG_COLOR);
++        tft->drawFastVLine(DSO_INFO_START_COLUMN, 0,320,BG_COLOR);
++        tft->drawFastVLine(479, 0,320,BG_COLOR);
+         
+ 
+     tft->setTextColor(BLACK,BG_COLOR);
+@@ -282,8 +282,8 @@
+     AND_ONE_F(volt,9);      
+ }
+ 
+-#define LOWER_BAR_PRINT(x,y) { tft->setCursor(y*64, 240-18); tft->myDrawString(x,64);}            
+-#define LOWER_BAR_PRINT_NCHARS(x,y,n) { tft->setCursor(y*64, 240-18); tft->myDrawString(x,n*18);}            
++#define LOWER_BAR_PRINT(x,y) { tft->setCursor(y*64, 320-18); tft->myDrawString(x,64);}            
++#define LOWER_BAR_PRINT_NCHARS(x,y,n) { tft->setCursor(y*64, 320-18); tft->myDrawString(x,n*18);}            
+     
+ #define HIGHER_BAR_PRINT(x,y) { tft->setCursor(y*64, 1); tft->myDrawString(x,64);}            
+ 
+@@ -360,16 +360,16 @@
+ 
+  void DSODisplay::drawAutoSetup(void )
+  {
+-     tft->fillRoundRect(320/2-AUTOCAL_BOX_WIDTH/2,
+-                         240/2-AUTOCAL_BOX_HEIGHT/2, 
++     tft->fillRoundRect(480/2-AUTOCAL_BOX_WIDTH/2,
++                         320/2-AUTOCAL_BOX_HEIGHT/2, 
+                          AUTOCAL_BOX_WIDTH,AUTOCAL_BOX_HEIGHT,
+                          4,AUTOCAL_COLOR);      
+  }
+ void DSODisplay::drawAutoSetupStep(int i )
+  {
+     int pg=((AUTOCAL_BOX_WIDTH-AUTOCAL_BORDER*2)*i)/3;
+-     tft-> fillRoundRect(320/2-AUTOCAL_BOX_WIDTH/2+AUTOCAL_BORDER,
+-                         240/2-AUTOCAL_BOX_HEIGHT/2+AUTOCAL_BORDER, 
++     tft-> fillRoundRect(480/2-AUTOCAL_BOX_WIDTH/2+AUTOCAL_BORDER,
++                         320/2-AUTOCAL_BOX_HEIGHT/2+AUTOCAL_BORDER, 
+                          pg,
+                          AUTOCAL_BOX_HEIGHT-AUTOCAL_BORDER*2,
+                          4,
+@@ -426,4 +426,4 @@
+ }
+ 
+ 
+-// EOF
+\ В конце файла нет новой строки
++// EOF

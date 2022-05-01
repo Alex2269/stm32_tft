@@ -1,0 +1,28 @@
+
+mkdir --parent ${HOME}/Arduino/hardware
+cd ${HOME}/Arduino/hardware
+git clone https://github.com/rogerclarkmelbourne/Arduino_STM32.git
+
+mkdir --parent ${HOME}/Arduino/libraries
+cd ${HOME}/Arduino/libraries
+git clone https://github.com/adafruit/Adafruit-GFX-Library
+git clone https://github.com/ZinggJM/GxTFT
+
+cp -f $(find ${HOME}/Arduino/hardware/Arduino_STM32/ -name wiring_private.h) ${HOME}/Arduino/hardware/Arduino_STM32/STM32F4/cores/maple
+
+replace pin _rs _bl on your board:
+
+# nano ~/Arduino/libraries/GxTFT/src/GxIO/STM32DUINO/GxIO_STM32F4_FSMC/GxIO_STM32F4_FSMC.cpp
+# nano ~/Arduino/libraries/GxTFT/src/GxIO/STM32GENERIC/GxIO_STM32F4_FSMC/GxIO_STM32F4_FSMC.cpp
+
+example:
+GxIO_STM32F4_FSMC::GxIO_STM32F4_FSMC(bool bl_active_high)
+{
+  _cs   = PD7;  // FSMC_NE1
+  _rs   = PD13; // FSMC_A18
+  _rst  = 0;    // not available, driven from NRST
+  _wr   = PD5;  // FSMC_NWE
+  _rd   = PD4;  // FSMC_NOE
+  _bl   = PB0;  // lighting tft
+  _bl_active_high = bl_active_high;
+}

@@ -1,0 +1,30 @@
+
+exit
+
+  g++ lessonXX.cpp -o myprog -lglut
+  g++ lessonXX.cpp -o myprog -lglut /usr/lib/x86_64-linux-gnu/libGL.so
+  g++ lesson40.cpp -lglut /usr/lib/x86_64-linux-gnu/libGL.so  -o myprog
+
+  /usr/bin/ld: /tmp/ccCj4cAH.o: неопределённая ссылка на символ «glEnd»
+  libGL.so.1: error adding symbols: DSO missing from command line
+
+  find /usr/lib -name 'libGL.so*'
+  /usr/lib/x86_64-linux-gnu/libGL.so
+
+  apt install -y  g++
+  apt install -y  gcc
+  apt install pkg-config ???
+
+  apt-file search libGL.so
+  apt-file search glfw3.h
+
+  apt install freeglut3-dev
+  apt install libgl-dev
+  apt install libglfw3-dev
+
+  apt-file search glew.h
+  libglew-dev: /usr/include/GL/glew.h
+  apt install libglew-dev
+
+  grep -i -n "glfwGetPrimaryMonitor" `find /usr/include -name '*.h'`
+

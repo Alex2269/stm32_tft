@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="120mm"
+   height="120mm"
+   viewBox="0 0 120 120"
+   version="1.1"
+   id="svg48"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="RGBY.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview50"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showguides="false"
+     inkscape:zoom="0.5"
+     inkscape:cx="396"
+     inkscape:cy="136"
+     inkscape:window-width="1564"
+     inkscape:window-height="865"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs45">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient13130">
+      <stop
+         style="stop-color:#1cebe8;stop-opacity:1;"
+         offset="0"
+         id="stop13126" />
+      <stop
+         style="stop-color:#1cebe8;stop-opacity:0;"
+         offset="1"
+         id="stop13128" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient2871"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#4d8a4d;stop-opacity:1;"
+         offset="0"
+         id="stop2869" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient13130"
+       id="linearGradient13134"
+       x1="-127.33765"
+       y1="224.82819"
+       x2="-7.3376498"
+       y2="224.82819"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.50000001,0,0,1.6498755,-63.668825,-145.80507)" />
+  </defs>
+  <g
+     inkscape:label="Слой 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(127.33765,-165.13351)">
+    <rect
+       style="fill:#393bff;stroke-width:0.0992186;fill-opacity:1"
+       id="rect98"
+       width="120"
+       height="30"
+       x="-127.33765"
+       y="225.13351" />
+    <rect
+       style="fill:#25ff23;fill-opacity:1;stroke-width:0.229136"
+       id="rect74"
+       width="30"
+       height="120"
+       x="195.13351"
+       y="7.3376436"
+       transform="rotate(90)" />
+    <rect
+       style="fill:#e3e335;stroke-width:0.229136;fill-opacity:1"
+       id="rect296"
+       width="30"
+       height="120"
+       x="-285.13351"
+       y="7.3376498"
+       transform="matrix(0,-1,-1,0,0,0)" />
+    <rect
+       style="fill:#e5371c;fill-opacity:1;stroke-width:0.229136"
+       id="rect336"
+       width="30"
+       height="120"
+       x="-195.13351"
+       y="7.3376498"
+       transform="matrix(0,-1,-1,0,0,0)"
+       inkscape:transform-center-x="8.7822462"
+       inkscape:transform-center-y="-482.45811" />
+    <path
+       id="rect32"
+       style="fill:url(#linearGradient13134);fill-opacity:1;stroke-width:0.33543"
+       d="m -127.33765,175.13351 h 60 l -60,100 z"
+       sodipodi:nodetypes="cccc" />
+  </g>
+</svg>

@@ -1,0 +1,159 @@
+diff -Naur STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/hardware/io_R61581.c STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/hardware/io_R61581.c
+--- STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/hardware/io_R61581.c	2022-02-13 23:14:33.131315067 +0200
++++ STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/hardware/io_R61581.c	2022-02-13 23:34:22.272871099 +0200
+@@ -15,8 +15,8 @@
+ 
+ void write_dma_buffer_data(uint16_t count)
+ {
+-  #define Channel 5
+-  #define TIMx TIM1
++  #define Channel 2
++  #define TIMx TIM2
+   dma_transmit(DMA1, (uint32_t)dma_buffer, ((uint32_t)&GPIOB->ODR), Channel, count);
+   TIMx->DIER |= TIM_DIER_UDE; // LL_TIM_EnableDMAReq_UPDATE(TIMx);
+ }
+diff -Naur STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/Inc/stm32f1xx_it.h STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/Inc/stm32f1xx_it.h
+--- STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/Inc/stm32f1xx_it.h	2022-02-13 23:14:33.131315067 +0200
++++ STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/Inc/stm32f1xx_it.h	2022-02-13 23:55:08.349121366 +0200
+@@ -49,7 +49,7 @@
+ void SVC_Handler(void);
+ void PendSV_Handler(void);
+ void SysTick_Handler(void);
+-void DMA1_Channel5_IRQHandler(void);
++void DMA1_Channel2_IRQHandler(void);
+ /* USER CODE BEGIN EFP */
+ 
+ /* USER CODE END EFP */
+diff -Naur STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/Src/main.c STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/Src/main.c
+--- STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/Src/main.c	2022-02-13 23:14:33.131315067 +0200
++++ STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/Src/main.c	2022-02-13 23:58:20.532921091 +0200
+@@ -108,14 +108,14 @@
+   // Touch_ADC_Init();
+   begin();
+ 
+-  #define Channel 5
+-  #define TIMx TIM1
++  #define Channel 2
++  #define TIMx TIM2
+   dma_clock_irq(Channel);
+   dma_setting(DMA1, Channel);
+   timer_setting(TIMx);
+ 
+   // dma_transmit(DMA1, (uint32_t)data, ((uint32_t)&GPIOB->ODR), Channel, 17);
+-  // TIMx->DIER |= TIM_DIER_UDE; // LL_TIM_EnableDMAReq_UPDATE(TIMx);
++  TIMx->DIER |= TIM_DIER_UDE; // LL_TIM_EnableDMAReq_UPDATE(TIMx);
+ 
+   /* USER CODE END 2 */
+ 
+diff -Naur STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/Src/stm32f1xx_it.c STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/Src/stm32f1xx_it.c
+--- STM32f103_ll_uGUI_R61581_tim1_dma/ugui/Core/Src/stm32f1xx_it.c	2022-02-13 23:14:33.131315067 +0200
++++ STM32f103_ll_uGUI_R61581_tim2_dma/ugui/Core/Src/stm32f1xx_it.c	2022-02-14 00:20:54.342916137 +0200
+@@ -112,19 +112,19 @@
+ /******************************************************************************/
+ 
+ /**
+-  * @brief This function handles DMA1 channel5 global interrupt.
++  * @brief This function handles DMA1 channel2 global interrupt.
+   */
+-void DMA1_Channel5_IRQHandler(void)
++void DMA1_Channel2_IRQHandler(void)
+ {
+-  /* USER CODE BEGIN DMA1_Channel5_IRQn 0 */
++  /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
+   #define DMAx DMA1
+-  #define Channel 5
++  #define Channel 2
+   DMAx->IFCR |= 2<<(4*(Channel-1)); // Channel transfer complete flag
+-  /* USER CODE END DMA1_Channel5_IRQn 0 */
++  /* USER CODE END DMA1_Channel2_IRQn 0 */
+ 
+-  /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
++  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
+ 
+-  /* USER CODE END DMA1_Channel5_IRQn 1 */
++  /* USER CODE END DMA1_Channel2_IRQn 1 */
+ }
+ 
+ /* USER CODE BEGIN 1 */
+diff -Naur STM32f103_ll_uGUI_R61581_tim1_dma/ugui/ugui.ioc STM32f103_ll_uGUI_R61581_tim2_dma/ugui/ugui.ioc
+--- STM32f103_ll_uGUI_R61581_tim1_dma/ugui/ugui.ioc	2022-02-13 23:14:33.139314886 +0200
++++ STM32f103_ll_uGUI_R61581_tim2_dma/ugui/ugui.ioc	2022-02-13 23:16:34.144587262 +0200
+@@ -5,17 +5,17 @@
+ ADC1.Rank-4\#ChannelRegularConversion=1
+ ADC1.SamplingTime-4\#ChannelRegularConversion=ADC_SAMPLETIME_1CYCLE_5
+ ADC1.master=1
+-Dma.Request0=TIM1_UP
++Dma.Request0=TIM2_UP
+ Dma.RequestsNb=1
+-Dma.TIM1_UP.0.Direction=DMA_PERIPH_TO_MEMORY
+-Dma.TIM1_UP.0.Instance=DMA1_Channel5
+-Dma.TIM1_UP.0.MemDataAlignment=DMA_MDATAALIGN_HALFWORD
+-Dma.TIM1_UP.0.MemInc=DMA_MINC_ENABLE
+-Dma.TIM1_UP.0.Mode=DMA_NORMAL
+-Dma.TIM1_UP.0.PeriphDataAlignment=DMA_PDATAALIGN_HALFWORD
+-Dma.TIM1_UP.0.PeriphInc=DMA_PINC_DISABLE
+-Dma.TIM1_UP.0.Priority=DMA_PRIORITY_VERY_HIGH
+-Dma.TIM1_UP.0.RequestParameters=Instance,Direction,PeriphInc,MemInc,PeriphDataAlignment,MemDataAlignment,Mode,Priority
++Dma.TIM2_UP.0.Direction=DMA_PERIPH_TO_MEMORY
++Dma.TIM2_UP.0.Instance=DMA1_Channel2
++Dma.TIM2_UP.0.MemDataAlignment=DMA_MDATAALIGN_HALFWORD
++Dma.TIM2_UP.0.MemInc=DMA_MINC_ENABLE
++Dma.TIM2_UP.0.Mode=DMA_NORMAL
++Dma.TIM2_UP.0.PeriphDataAlignment=DMA_PDATAALIGN_HALFWORD
++Dma.TIM2_UP.0.PeriphInc=DMA_PINC_DISABLE
++Dma.TIM2_UP.0.Priority=DMA_PRIORITY_VERY_HIGH
++Dma.TIM2_UP.0.RequestParameters=Instance,Direction,PeriphInc,MemInc,PeriphDataAlignment,MemDataAlignment,Mode,Priority
+ File.Version=6
+ KeepUserPlacement=true
+ Mcu.Family=STM32F1
+@@ -24,7 +24,7 @@
+ Mcu.IP2=NVIC
+ Mcu.IP3=RCC
+ Mcu.IP4=SYS
+-Mcu.IP5=TIM1
++Mcu.IP5=TIM2
+ Mcu.IPNb=6
+ Mcu.Name=STM32F103C(8-B)Tx
+ Mcu.Package=LQFP48
+@@ -39,7 +39,7 @@
+ Mcu.Pin16=PB9
+ Mcu.Pin17=VP_ADC1_Vref_Input
+ Mcu.Pin18=VP_SYS_VS_Systick
+-Mcu.Pin19=VP_TIM1_VS_ClockSourceINT
++Mcu.Pin19=VP_TIM2_VS_ClockSourceINT
+ Mcu.Pin2=PB10
+ Mcu.Pin3=PB11
+ Mcu.Pin4=PB12
+@@ -55,7 +55,7 @@
+ MxCube.Version=6.4.0
+ MxDb.Version=DB.6.0.40
+ NVIC.BusFault_IRQn=true\:0\:0\:false\:false\:false\:true\:false
+-NVIC.DMA1_Channel5_IRQn=true\:0\:0\:false\:false\:true\:false\:true
++NVIC.DMA1_Channel2_IRQn=true\:0\:0\:false\:false\:true\:false\:true
+ NVIC.DebugMonitor_IRQn=true\:0\:0\:false\:false\:false\:true\:false
+ NVIC.ForceEnableDMAVector=true
+ NVIC.HardFault_IRQn=true\:0\:0\:false\:false\:false\:true\:false
+@@ -156,7 +156,7 @@
+ ProjectManager.TargetToolchain=Makefile
+ ProjectManager.ToolChainLocation=
+ ProjectManager.UnderRoot=false
+-ProjectManager.functionlistsort=1-MX_GPIO_Init-GPIO-false-LL-true,false-2-MX_DMA_Init-DMA-true-LL-true,3-SystemClock_Config-RCC-false-LL-false,4-MX_ADC1_Init-ADC1-false-LL-true,false-5-MX_TIM1_Init-TIM1-true-LL-true
++ProjectManager.functionlistsort=1-MX_GPIO_Init-GPIO-false-LL-true,false-2-MX_DMA_Init-DMA-true-LL-true,3-SystemClock_Config-RCC-false-LL-false,4-MX_ADC1_Init-ADC1-false-LL-true,false-5-MX_TIM2_Init-TIM2-true-LL-true
+ RCC.ADCFreqValue=12000000
+ RCC.ADCPresc=RCC_ADCPCLK2_DIV6
+ RCC.AHBFreq_Value=72000000
+@@ -180,10 +180,12 @@
+ RCC.TimSysFreq_Value=72000000
+ RCC.USBFreq_Value=72000000
+ RCC.VCOOutput2Freq_Value=8000000
++TIM2.IPParameters=TIM_MasterOutputTrigger
++TIM2.TIM_MasterOutputTrigger=TIM_TRGO_UPDATE
+ VP_ADC1_Vref_Input.Mode=IN-Vrefint
+ VP_ADC1_Vref_Input.Signal=ADC1_Vref_Input
+ VP_SYS_VS_Systick.Mode=SysTick
+ VP_SYS_VS_Systick.Signal=SYS_VS_Systick
+-VP_TIM1_VS_ClockSourceINT.Mode=Internal
+-VP_TIM1_VS_ClockSourceINT.Signal=TIM1_VS_ClockSourceINT
++VP_TIM2_VS_ClockSourceINT.Mode=Internal
++VP_TIM2_VS_ClockSourceINT.Signal=TIM2_VS_ClockSourceINT
+ board=custom

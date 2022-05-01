@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+if [ $TERM != "screen" ]; then
+  ( (
+    tmux attach) ||
+    (
+      SESSION=$USER
+      tmux -2 new-session -d -s $SESSION
+      tmux new-session -d -s $SESSION
+      tmux splitw -p 45 -h
+      tmux select-pane -t 0; tmux send-keys 'killall openocd ; sleep 1; openocd -f sc_openocd.cfg' C-m
+      tmux select-pane -t 1; tmux send-keys 'gdb-multiarch --eval-command "tar ext :3333" ' ${1} C-m
+      tmux -2 attach-session -t $SESSION
+    )
+  ) && exit 0
+  echo "tmux failed to start"
+fi
+

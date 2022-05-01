@@ -1,0 +1,170 @@
+diff -Naur STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/hardware/io_R61581.c STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/hardware/io_R61581.c
+--- STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/hardware/io_R61581.c	2022-02-13 17:34:38.637853219 +0200
++++ STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/hardware/io_R61581.c	2022-02-13 17:24:17.726502910 +0200
+@@ -15,8 +15,8 @@
+ 
+ void write_dma_buffer_data(uint16_t count)
+ {
+-  dma_transmit(DMA1, (uint32_t)dma_buffer, ((uint32_t)&GPIOB->ODR), 3, count);
+-  TIM3->DIER |= TIM_DIER_UDE; // LL_TIM_EnableDMAReq_UPDATE(TIM4);
++  dma_transmit(DMA1, (uint32_t)dma_buffer, ((uint32_t)&GPIOB->ODR), 7, count);
++  TIM4->DIER |= TIM_DIER_UDE; // LL_TIM_EnableDMAReq_UPDATE(TIM4);
+ }
+ 
+ #pragma GCC pop_options
+diff -Naur STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/hardware/tim_dma.c STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/hardware/tim_dma.c
+--- STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/hardware/tim_dma.c	2022-02-13 17:31:28.421664898 +0200
++++ STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/hardware/tim_dma.c	2022-02-13 17:24:17.726502910 +0200
+@@ -11,7 +11,7 @@
+ 
+ void timer_setting(TIM_TypeDef *TIMx)
+ {
+-  LL_APB1_GRP1_EnableClock(RCC_APB1ENR_TIM3EN);
++  LL_APB1_GRP1_EnableClock(RCC_APB1ENR_TIM4EN);
+   LL_TIM_DisableCounter(TIMx);
+   LL_TIM_SetPrescaler(TIMx, 0);
+   LL_TIM_EnableARRPreload(TIMx);
+diff -Naur STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/Inc/stm32f1xx_it.h STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/Inc/stm32f1xx_it.h
+--- STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/Inc/stm32f1xx_it.h	2022-02-13 18:17:00.607248723 +0200
++++ STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/Inc/stm32f1xx_it.h	2022-02-13 17:44:06.984986931 +0200
+@@ -50,7 +50,7 @@
+ void SVC_Handler(void);
+ void PendSV_Handler(void);
+ void SysTick_Handler(void);
+-void DMA1_Channel3_IRQHandler(void);
++void DMA1_Channel7_IRQHandler(void);
+ /* USER CODE BEGIN EFP */
+ 
+ /* USER CODE END EFP */
+diff -Naur STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/Src/main.c STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/Src/main.c
+--- STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/Src/main.c	2022-02-13 18:17:01.167236728 +0200
++++ STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/Src/main.c	2022-02-13 17:44:07.908961737 +0200
+@@ -108,12 +108,12 @@
+   // Touch_ADC_Init();
+   begin();
+ 
+-  dma_clock_irq(3);
+-  dma_setting(DMA1, 3);
+-  timer_setting(TIM3);
++  dma_clock_irq(7);
++  dma_setting(DMA1, 7);
++  timer_setting(TIM4);
+ 
+   // dma_transmit(DMA1, (uint32_t)data, ((uint32_t)&GPIOB->ODR), 7, 17);
+-  // TIM3->DIER |= TIM_DIER_UDE; // LL_TIM_EnableDMAReq_UPDATE(TIM3);
++  // TIM4->DIER |= TIM_DIER_UDE; // LL_TIM_EnableDMAReq_UPDATE(TIM4);
+ 
+ 
+   /* USER CODE END 2 */
+diff -Naur STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/Src/stm32f1xx_it.c STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/Src/stm32f1xx_it.c
+--- STM32f103_ll_uGUI_R61581_tim3_dma/ugui/Core/Src/stm32f1xx_it.c	2022-02-13 18:17:00.515250693 +0200
++++ STM32f103_ll_uGUI_R61581_tim4_dma/ugui/Core/Src/stm32f1xx_it.c	2022-02-13 17:44:06.848990641 +0200
+@@ -112,19 +112,19 @@
+ /******************************************************************************/
+ 
+ /**
+-  * @brief This function handles DMA1 channel3 global interrupt.
++  * @brief This function handles DMA1 channel7 global interrupt.
+   */
+-void DMA1_Channel3_IRQHandler(void)
++void DMA1_Channel7_IRQHandler(void)
+ {
+-  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
++  /* USER CODE BEGIN DMA1_Channel7_IRQn 0 */
+   #define DMAx DMA1
+-  #define Channel 3
++  #define Channel 7
+   DMAx->IFCR |= 2<<(4*(Channel-1)); // Channel transfer complete flag
+-  /* USER CODE END DMA1_Channel3_IRQn 0 */
++  /* USER CODE END DMA1_Channel7_IRQn 0 */
+ 
+-  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
++  /* USER CODE BEGIN DMA1_Channel7_IRQn 1 */
+ 
+-  /* USER CODE END DMA1_Channel3_IRQn 1 */
++  /* USER CODE END DMA1_Channel7_IRQn 1 */
+ }
+ 
+ /* USER CODE BEGIN 1 */
+diff -Naur STM32f103_ll_uGUI_R61581_tim3_dma/ugui/ugui.ioc STM32f103_ll_uGUI_R61581_tim4_dma/ugui/ugui.ioc
+--- STM32f103_ll_uGUI_R61581_tim3_dma/ugui/ugui.ioc	2022-02-13 18:19:15.924342572 +0200
++++ STM32f103_ll_uGUI_R61581_tim4_dma/ugui/ugui.ioc	2022-02-13 17:44:20.548617949 +0200
+@@ -5,17 +5,17 @@
+ ADC1.Rank-4\#ChannelRegularConversion=1
+ ADC1.SamplingTime-4\#ChannelRegularConversion=ADC_SAMPLETIME_1CYCLE_5
+ ADC1.master=1
+-Dma.Request0=TIM3_CH4/UP
++Dma.Request0=TIM4_UP
+ Dma.RequestsNb=1
+-Dma.TIM3_CH4/UP.0.Direction=DMA_PERIPH_TO_MEMORY
+-Dma.TIM3_CH4/UP.0.Instance=DMA1_Channel3
+-Dma.TIM3_CH4/UP.0.MemDataAlignment=DMA_MDATAALIGN_HALFWORD
+-Dma.TIM3_CH4/UP.0.MemInc=DMA_MINC_ENABLE
+-Dma.TIM3_CH4/UP.0.Mode=DMA_NORMAL
+-Dma.TIM3_CH4/UP.0.PeriphDataAlignment=DMA_PDATAALIGN_HALFWORD
+-Dma.TIM3_CH4/UP.0.PeriphInc=DMA_PINC_DISABLE
+-Dma.TIM3_CH4/UP.0.Priority=DMA_PRIORITY_VERY_HIGH
+-Dma.TIM3_CH4/UP.0.RequestParameters=Instance,Direction,PeriphInc,MemInc,PeriphDataAlignment,MemDataAlignment,Mode,Priority
++Dma.TIM4_UP.0.Direction=DMA_PERIPH_TO_MEMORY
++Dma.TIM4_UP.0.Instance=DMA1_Channel7
++Dma.TIM4_UP.0.MemDataAlignment=DMA_MDATAALIGN_HALFWORD
++Dma.TIM4_UP.0.MemInc=DMA_MINC_ENABLE
++Dma.TIM4_UP.0.Mode=DMA_NORMAL
++Dma.TIM4_UP.0.PeriphDataAlignment=DMA_PDATAALIGN_HALFWORD
++Dma.TIM4_UP.0.PeriphInc=DMA_PINC_DISABLE
++Dma.TIM4_UP.0.Priority=DMA_PRIORITY_VERY_HIGH
++Dma.TIM4_UP.0.RequestParameters=Instance,Direction,PeriphInc,MemInc,PeriphDataAlignment,MemDataAlignment,Mode,Priority
+ File.Version=6
+ KeepUserPlacement=true
+ Mcu.Family=STM32F1
+@@ -24,7 +24,7 @@
+ Mcu.IP2=NVIC
+ Mcu.IP3=RCC
+ Mcu.IP4=SYS
+-Mcu.IP5=TIM3
++Mcu.IP5=TIM4
+ Mcu.IPNb=6
+ Mcu.Name=STM32F103C(8-B)Tx
+ Mcu.Package=LQFP48
+@@ -39,7 +39,7 @@
+ Mcu.Pin16=PB9
+ Mcu.Pin17=VP_ADC1_Vref_Input
+ Mcu.Pin18=VP_SYS_VS_Systick
+-Mcu.Pin19=VP_TIM3_VS_ClockSourceINT
++Mcu.Pin19=VP_TIM4_VS_ClockSourceINT
+ Mcu.Pin2=PB10
+ Mcu.Pin3=PB11
+ Mcu.Pin4=PB12
+@@ -55,7 +55,7 @@
+ MxCube.Version=6.4.0
+ MxDb.Version=DB.6.0.40
+ NVIC.BusFault_IRQn=true\:0\:0\:false\:false\:false\:true\:false
+-NVIC.DMA1_Channel3_IRQn=true\:0\:0\:false\:false\:true\:false\:true
++NVIC.DMA1_Channel7_IRQn=true\:0\:0\:false\:false\:true\:false\:true
+ NVIC.DebugMonitor_IRQn=true\:0\:0\:false\:false\:false\:true\:false
+ NVIC.ForceEnableDMAVector=true
+ NVIC.HardFault_IRQn=true\:0\:0\:false\:false\:false\:true\:false
+@@ -156,7 +156,7 @@
+ ProjectManager.TargetToolchain=Makefile
+ ProjectManager.ToolChainLocation=
+ ProjectManager.UnderRoot=false
+-ProjectManager.functionlistsort=1-MX_GPIO_Init-GPIO-false-LL-true,false-2-MX_DMA_Init-DMA-true-LL-true,3-SystemClock_Config-RCC-false-LL-false,4-MX_ADC1_Init-ADC1-false-LL-true,false-5-MX_TIM3_Init-TIM3-true-LL-true
++ProjectManager.functionlistsort=1-MX_GPIO_Init-GPIO-false-LL-true,false-2-MX_DMA_Init-DMA-true-LL-true,3-SystemClock_Config-RCC-false-LL-false,4-MX_ADC1_Init-ADC1-false-LL-true,false-5-MX_TIM4_Init-TIM4-true-LL-true
+ RCC.ADCFreqValue=12000000
+ RCC.ADCPresc=RCC_ADCPCLK2_DIV6
+ RCC.AHBFreq_Value=72000000
+@@ -180,10 +180,12 @@
+ RCC.TimSysFreq_Value=72000000
+ RCC.USBFreq_Value=72000000
+ RCC.VCOOutput2Freq_Value=8000000
++TIM4.IPParameters=TIM_MasterOutputTrigger
++TIM4.TIM_MasterOutputTrigger=TIM_TRGO_UPDATE
+ VP_ADC1_Vref_Input.Mode=IN-Vrefint
+ VP_ADC1_Vref_Input.Signal=ADC1_Vref_Input
+ VP_SYS_VS_Systick.Mode=SysTick
+ VP_SYS_VS_Systick.Signal=SYS_VS_Systick
+-VP_TIM3_VS_ClockSourceINT.Mode=Internal
+-VP_TIM3_VS_ClockSourceINT.Signal=TIM3_VS_ClockSourceINT
++VP_TIM4_VS_ClockSourceINT.Mode=Internal
++VP_TIM4_VS_ClockSourceINT.Signal=TIM4_VS_ClockSourceINT
+ board=custom

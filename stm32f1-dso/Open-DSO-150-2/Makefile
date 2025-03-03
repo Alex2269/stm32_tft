@@ -1,7 +1,8 @@
+### run make SILENT=0 , with  all print.
+### SILENT=1 , default silent mode
 
-### run make VERBOSE=1 , it will print.
-
-ifndef VERBOSE
+SILENT ?= 1
+ifeq (1,$(SILENT))
 .SILENT:
 endif
 
@@ -10,11 +11,11 @@ TARGET = application
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -O2
+OPT = -Og
 # debug output periph regs
 OPT += -g3
 
-ENABLE_SEMIHOSTING ?= 1
+ENABLE_SEMIHOSTING ?= 0
 
 # Build paths
 BUILD_DIR = build
@@ -22,7 +23,6 @@ BUILD_ASM_DIR = $(BUILD_DIR)/asm
 BUILD_APP_DIR = $(BUILD_DIR)/app
 BUILD_CC_DIR  = $(BUILD_DIR)/ccc
 BUILD_CPP_DIR = $(BUILD_DIR)/cpp
-
 
 # recursive find sources files
 # sources
@@ -33,8 +33,6 @@ ASM_SOURCES += $(shell find ${ROOT_DIR} -name '*.s')
 
 # binaries
 PREFIX = arm-none-eabi-
-# The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
-# either it can be added to the PATH environment variable.
 ifdef GCC_PATH
 CC = $(GCC_PATH)/$(PREFIX)gcc
 CXX = $(GCC_PATH)/$(PREFIX)g++
@@ -90,18 +88,49 @@ C_DEFS += -D STM32F103xB
 # AS includes
 AS_INCLUDES = 
 
-# includes
-# Find header directories
-INCDIR = .
-C_INC    =$(shell find -L $(INCDIR) -name '*.h' -exec dirname {} \; | uniq)
-CPP_INC +=$(shell find -L $(INCDIR) -name '*.hpp' -exec dirname {} \; | uniq)
-C_INCLUDES  =$(C_INC:%=-I %)
-CPP_INCLUDES=$(CPP_INC:%=-I%)
+# Includes
+# Find header files: h, hh, hpp.
+INCDIR      = .
+C_INC       = $(shell find -L $(INCDIR) -name '*.h*' -exec dirname {} \; | uniq)
+C_INCLUDES  = $(C_INC:%=-I %)
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+# ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-GCCFLAGS += -Wall
+WARNINGS := -Wall
+WARNINGS += -Wextra
+WARNINGS += -Wshadow
+WARNINGS += -Wundef
+WARNINGS += -Wmaybe-uninitialized
+WARNINGS += -Wno-unused-function
+WARNINGS += -Wno-error=strict-prototypes
+WARNINGS += -Wno-error=cpp
+WARNINGS += -Wno-unused-parameter
+WARNINGS += -Wno-missing-field-initializers
+WARNINGS += -Wno-format-nonliteral
+WARNINGS += -Wno-cast-qual
+WARNINGS += -Wno-switch-default
+WARNINGS += -Wno-ignored-qualifiers
+WARNINGS += -Wno-error=pedantic
+WARNINGS += -Wno-sign-compare
+WARNINGS += -Wno-error=missing-prototypes
+# WARNINGS += -Wpointer-arith -fno-strict-aliasing
+# WARNINGS += -Wuninitialized
+# WARNINGS += -Wunreachable-code
+# WARNINGS += -Wreturn-type
+# WARNINGS += -Wmultichar
+# WARNINGS += -Wformat-security
+# WARNINGS += -Wdouble-promotion
+# WARNINGS += -Wclobbered
+# WARNINGS += -Wdeprecated
+# WARNINGS += -Wempty-body
+# WARNINGS += -Wshift-negative-value
+# WARNINGS += -Wtype-limits
+# WARNINGS += -Wsizeof-pointer-memaccess
+# WARNINGS += -Wpointer-arith
+
+GCCFLAGS += $(WARNINGS)
+
 GCCFLAGS += -fdata-sections
 GCCFLAGS += -ffunction-sections
 GCCFLAGS += -nostdlib
@@ -111,14 +140,15 @@ GCCFLAGS += -fno-rtti
 GCCFLAGS += -fno-exceptions
 GCCFLAGS += -fno-use-cxa-atexit
 
-DEBUG_FLAGS = -ggdb3 -D NDEBUG
-FLAGSCC     = $(GCCFLAGS) $(DEBUG_FLAGS) $(MCU)
-LDFLAGS     = -nostartfiles $(GCCFLAGS) $(DEBUG_FLAGS)
-
-CFLAGS_STD = -c -O2 -w -std=gnu17 $(GCCFLAGS) $(FLAGSCC)
-CXXFLAGS_STD = -c -O2 -w -std=gnu++17 $(GCCFLAGS)
+CFLAGS_STD = -c -Os -w -std=gnu17 $(GCCFLAGS)
+CXXFLAGS_STD = -c -Os -w -std=gnu++17 $(GCCFLAGS)
 
 CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(CFLAGS_STD) 
+CFLAGS += -Wmissing-prototypes
+CFLAGS += -Wno-discarded-qualifiers
+CFLAGS += -Wno-implicit-function-declaration
+CFLAGS += -Wno-implicit-int
+CFLAGS += -Wno-incompatible-pointer-types
 CPPFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(CXXFLAGS_STD) 
 
 ifeq ($(DEBUG), 1)
@@ -130,20 +160,18 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
 LDSCRIPT += $(shell find ${ROOT_DIR} -name '*_FLASH.ld')
 
-FLASH_SIZE=128K
-RAM_SIZE=20K
+FLASH_SIZE=65536
+RAM_SIZE=20480
 
 # libraries
 LIBDIR =
 LIBS = -lc -lm
 
 ifeq (1,$(ENABLE_SEMIHOSTING))
-LDFLAGS += --specs=rdimon.specs
 LIBS += -lrdimon
 # LIBS += --specs=nano.specs -lrdimon_nano # no float printf
 else
-LDFLAGS += --specs=nano.specs
-LIBS += -lnosys -static
+LIBS += -lnosys
 endif
 
 LDFLAGS += -Wl,--defsym=LD_FLASH_OFFSET=0
@@ -157,11 +185,19 @@ LDFLAGS += -Wl,--entry=Reset_Handler
 LDFLAGS += -Wl,--unresolved-symbols=report-all
 LDFLAGS += -Wl,--warn-common
 LDFLAGS += -Wl,--default-script=$(LDSCRIPT)
+LDFLAGS += -lgcc
+LDFLAGS += -lstdc++
 LDFLAGS += -Wl,--start-group
 LDFLAGS +=  $(LIBDIR) $(LIBS)
 LDFLAGS += -Wl,--end-group
-LDFLAGS += -lgcc
-LDFLAGS += -lstdc++
+
+ifeq (1,$(ENABLE_SEMIHOSTING))
+LDFLAGS += --specs=rdimon.specs
+else
+LDFLAGS += --specs=nano.specs
+# LDFLAGS += -u _printf_float # printf from newlib-nano
+# LDFLAGS += -u _scanf_float # scanf from newlib-nano
+endif
 
 # default action: build all
 all: $(BUILD_APP_DIR)/$(TARGET).elf $(BUILD_APP_DIR)/$(TARGET).hex $(BUILD_APP_DIR)/$(TARGET).bin
@@ -171,11 +207,9 @@ green=\033[0;32m
 YELLOW=\033[1;33m
 NC=\033[0m
 ##-------------##
-
-
-#######################################
+###
 # build the application
-#######################################
+###
 # list of objects
 OBJECTS = $(addprefix $(BUILD_CC_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
@@ -197,7 +231,7 @@ $(BUILD_CPP_DIR)/%.o: %.cpp Makefile | $(BUILD_CPP_DIR)
 
 $(BUILD_ASM_DIR)/%.o: %.s Makefile | $(BUILD_ASM_DIR)
 	@echo " ${green} [compile:] ${YELLOW} $< ${NC}"
-	$(AS) -c $(CFLAGS) $< -o $@
+	$(AS) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_CC_DIR)/$(notdir $(<:.s=.lst)) $< -o $@
 
 $(BUILD_APP_DIR)/$(TARGET).elf: $(OBJECTS) Makefile | $(BUILD_APP_DIR)
 	@echo " ${green} [linking:] ${YELLOW} $@ ${NC} \n"
@@ -220,9 +254,9 @@ $(BUILD_APP_DIR):
 $(BUILD_ASM_DIR):
 	mkdir -p $@
 
-#######################################
+###
 # clean up
-#######################################
+###
 clean:
 	-rm -fR $(BUILD_DIR)
 
@@ -243,7 +277,7 @@ stm32flash:
 # Generate OpenOCD config file
 OPENOCD_SCRIPT    = 'sc_openocd.cfg'
 GDB_PORT          = '3333'
-OPENOCD_INTERFACE = 'interface/stlink.cfg'
+OPENOCD_INTERFACE = 'interface/stlink-v2.cfg'
 OPENOCD_TARGET    = 'target/stm32f1x.cfg'
 ADAPTER_SPEED     = 'adapter speed 1800'
 #######################################
@@ -271,7 +305,6 @@ debug:
 	-iex "monitor halt" \
 	$(BUILD_APP_DIR)/$(TARGET).elf
 endif
-#######################################
 
 #######################################
 # dependencies

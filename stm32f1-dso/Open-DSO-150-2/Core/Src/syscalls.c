@@ -74,6 +74,11 @@ void initialise_monitor_handles()
 {
 }
 
+void _init()
+{
+}
+
+
 int _getpid(void)
 {
 	return 1;

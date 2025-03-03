@@ -95,7 +95,7 @@ AS_INCLUDES =
 INCDIR = .
 C_INC    =$(shell find -L $(INCDIR) -name '*.h' -exec dirname {} \; | uniq)
 CPP_INC +=$(shell find -L $(INCDIR) -name '*.hpp' -exec dirname {} \; | uniq)
-C_INCLUDES  =$(C_INC:%=-I %)
+C_INCLUDES  =$(C_INC:%=-I%)
 CPP_INCLUDES=$(CPP_INC:%=-I%)
 
 # compile gcc flags
@@ -118,7 +118,7 @@ LDFLAGS     = -nostartfiles $(GCCFLAGS) $(DEBUG_FLAGS)
 CFLAGS_STD = -c -O2 -w -std=gnu17 $(GCCFLAGS) $(FLAGSCC)
 CXXFLAGS_STD = -c -O2 -w -std=gnu++17 $(GCCFLAGS)
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(CFLAGS_STD) 
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(CFLAGS_STD)
 CPPFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) $(CXXFLAGS_STD) 
 
 ifeq ($(DEBUG), 1)
@@ -128,10 +128,10 @@ endif
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 
-LDSCRIPT += $(shell find ${ROOT_DIR} -name '*_FLASH.ld')
+LDSCRIPT += $(shell find ${ROOT_DIR} -name '*_flash*.ld')
 
-FLASH_SIZE=128K
-RAM_SIZE=20K
+FLASH_SIZE=65536
+RAM_SIZE=20480
 
 # libraries
 LIBDIR =

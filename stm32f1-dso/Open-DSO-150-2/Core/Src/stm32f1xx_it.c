@@ -227,6 +227,7 @@ void EXTI9_5_IRQHandler(void)
 	HAL_GPIO_EXTI_IRQHandler(DB7_Pin);
 }
 
+void HAL_GPIO_TRIG_IRQHandler(uint16_t GPIO_Pin);
 //D1,D2,D3 on PB13,14,15
 void EXTI15_10_IRQHandler(void)
 {
